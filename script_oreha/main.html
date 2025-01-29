@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crafting Front-End</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        h1.display-4 {
+            font-family: 'Arial', sans-serif;
+            color: #0056b3;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        p.lead {
+            font-size: 1.2rem;
+            color: #555;
+            margin-top: 10px;
+        }
+        .tooltip-icon {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .tooltip-icon img {
+            width: 32px;
+            height: 32px;
+        }
+    </style>
+    <script>
+        function craftItem() {
+            const reqBlue = 33;
+            const reqWhite = 86;
+            const reqGreen = 45;
+
+            let blue = parseInt(document.getElementById("blueMaterial").value);
+            let green = parseInt(document.getElementById("greenMaterial").value);
+            let white = parseInt(document.getElementById("whiteMaterial").value);
+
+            let powder = 0;
+            let initialCraftableTimes = Math.min(Math.floor(blue / reqBlue), Math.floor(green / reqGreen), Math.floor(white / reqWhite));
+            let bestCrafts = initialCraftableTimes;
+
+            let tradedWhite = 0;
+            let tradedGreen = 0;
+
+            while (true) {
+                let craftsWhite = Math.floor(white / reqWhite);
+                let craftsGreen = Math.floor(green / reqGreen);
+
+                let bottleneck = craftsWhite <= craftsGreen ? "white" : "green";
+                let nonBottleneck = bottleneck === "white" ? "green" : "white";
+
+                let improved = false;
+
+                if (nonBottleneck === "green" && green >= 50) {
+                    let futureGreenCrafts = Math.floor((green - 50) / reqGreen);
+                    if (futureGreenCrafts >= bestCrafts) {
+                        green -= 50;
+                        powder += 80;
+                        tradedGreen++;
+                        while (powder >= 100) {
+                            powder -= 100;
+                            blue += 10;
+                        }
+                        bestCrafts = Math.min(Math.floor(blue / reqBlue), Math.floor(green / reqGreen), Math.floor(white / reqWhite));
+                        improved = true;
+                    } else {
+                        break;
+                    }
+                } else if (nonBottleneck === "white" && white >= 100) {
+                    let futureWhiteCrafts = Math.floor((white - 100) / reqWhite);
+                    if (futureWhiteCrafts >= bestCrafts) {
+                        white -= 100;
+                        powder += 80;
+                        tradedWhite++;
+                        while (powder >= 100) {
+                            powder -= 100;
+                            blue += 10;
+                        }
+                        bestCrafts = Math.min(Math.floor(blue / reqBlue), Math.floor(green / reqGreen), Math.floor(white / reqWhite));
+                        improved = true;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (!improved) {
+                    break;
+                }
+            }
+
+            let totalCrafts = bestCrafts;
+
+            document.getElementById("initialCraftableTimes").value = initialCraftableTimes;
+            document.getElementById("totalCrafts").value = totalCrafts;
+            document.getElementById("tradedWhite").value = tradedWhite;
+            document.getElementById("tradedGreen").value = tradedGreen;
+        }
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="images/icon.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+                Lost Ark's Crafting Simulator
+            </a>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="text-center mb-4">
+            <h1 class="display-4 fw-bold">Welcome to the Crafting Simulator</h1>
+            <span 
+                class="tooltip-icon"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="How do I use it?&#10;Check the amount of rare, uncommon and common materials (blue, green and white) in your game and place these values in the corresponding places.">
+                <img src="images/question_mark.png" alt="Help">
+            </span>
+
+        </div>
+        <form>
+            <div class="row mb-3">
+                <div class="col-md-4 text-center">
+                    <img src="images/blue_material.png" alt="Blue Material" class="img-fluid mb-2">
+                    <input type="number" class="form-control" id="blueMaterial" value="156" required>
+                </div>
+                <div class="col-md-4 text-center">
+                    <img src="images/green_material.png" alt="Green Material" class="img-fluid mb-2">
+                    <input type="number" class="form-control" id="greenMaterial" value="14670" required>
+                </div>
+                <div class="col-md-4 text-center">
+                    <img src="images/white_material.png" alt="White Material" class="img-fluid mb-2">
+                    <input type="number" class="form-control" id="whiteMaterial" value="27842" required>
+                </div>
+            </div>
+            <hr>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="initialCraftableTimes" class="form-label">Initial craftable times</label>
+                    <input type="text" class="form-control" id="initialCraftableTimes" disabled>
+                </div>
+                <div class="col-md-6">
+                    <label for="totalCrafts" class="form-label">Number of total crafts</label>
+                    <input type="text" class="form-control" id="totalCrafts" disabled>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="tradedWhite" class="form-label">Traded white</label>
+                    <input type="text" class="form-control" id="tradedWhite" disabled>
+                </div>
+                <div class="col-md-6">
+                    <label for="tradedGreen" class="form-label">Traded green</label>
+                    <input type="text" class="form-control" id="tradedGreen" disabled>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-primary" onclick="craftItem()">Calculate</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html>
